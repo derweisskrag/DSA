@@ -50,3 +50,22 @@ students to prepare for midterms, colloquiums and, most importantly, exams.
 There is no need to rewrite lecture materials, so I decided to summarize each lecture 
 and provide illustrations, examples, and others. In other words, I contributed to the
 DSA course.
+
+
+### Innovations! Coming to the 1.1 version of DSA (current 1.0)
+
+- *RBTree*
+- *Skip lists*
+- *Empowered linked list*
+- *BST - Binary search tree*
+- *AVL*
+- *HaspMap*, and *Unordered map*
+- *MaxHeap*
+- *Bi-heap*
+- *Priority Queue*
+
+See LinkedList new functions! Of them:
+
+- *find_middle*
+- *sort*
+

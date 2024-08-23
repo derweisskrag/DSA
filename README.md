@@ -69,6 +69,9 @@ See LinkedList new functions! Of them:
 - *find_middle*
 - *sort*
 
-### Closure and Lifetime in Python: context
+<<<<<<< HEAD
 
 
+
+=======
+>>>>>>> e45ac33b93178d8f62ffa9910ac787466b21f2bb

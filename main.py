@@ -1,18 +1,18 @@
-from src.queues.circular_queue.implementation.circular_queue_linked_list import CircularQueue
-from src.queues.queue.implementation.queue_list import Queue
+from src.trees.red_black_tree.implementation.rbtree import RBTree
+
+import matplotlib.pyplot as plt
 
 
 def main():
-    cq = CircularQueue()
-    cq.enqueue(1)
-    cq.enqueue(2)
-    cq.enqueue(3)
-    cq.display()
-    cq.peek()
+    # Example usage
+    ll = LinkedList()
+    ll.append(1)
+    ll.append(2)
+    ll.append(3)
+    ll.append(4)
 
-    cq.dequeue()
-    cq.display()
-    cq.peek()
+    ll.display()
+
 
 if __name__ == "__main__":
     main()

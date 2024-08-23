@@ -92,40 +92,118 @@ class MinHeap[T](MinHeapInterface):
 
     @override
     def peek(self) -> None:
+        peek = self.get_peek()
         # handle errors
-        print(self._min_heap[0])
+        print(f"Peek: {peek}")
+
+    @override
+    def get_peek(self) -> T:
+        return self._min_heap[0]
 
     @override
     def pop(self) -> T:
-        ...
+        # swap root with the last index
+        self.swap(0, len(self._min_heap) - 1)
+
+        # pop the last element
+        result = self._min_heap.pop()
+
+        # restore the min heap property
+        self.heapify_down(0)
+
+        # return extracted element
+        return result
 
     @override
     def insert(self, element: T) -> None:
-        ...
+        self._min_heap.append(element)
+        self.heapify_up(len(self._min_heap) - 1)
 
     @override
     def insert_many(self, elements: Iterable[T]) -> None:
-        ...
+        for value in elements:
+            self.insert(value)
 
     @override
     def heapify_up(self, index: int) -> None:
-        ...
+        # you cannot go up if no parent
+        # example:
+        #           1
+        #         /   \
+        #        2     3
+        #       / \
+        #      4   5
+        #
+        # How to go from 3 to 1? Using the parent index!
+
+        while self.has_parent(index) and self._min_heap[self.parent(index)] > self._min_heap[index]:
+            # get parent index
+            parent_index = self.parent(index)
+
+            # swap (condition is in the while loop)
+            self.swap(index, parent_index)
+
+            # to next iteration
+            index = parent_index
 
     @override
     def heapify_down(self, index: int) -> None:
-        ...
+        # after we extracted the least element
+        # our root is not balanced: not the smallest
+        # also we should traverse the heap in the way find the smallest
+
+        # define the smallest
+        smallest_element_index = None
+
+        # traverse the heap until we end up
+        # in leaf
+        while not self.is_leaf(index):
+            if self.has_left_child(index):
+                # we have the left child
+                smallest_element_index = self.left_child(index)
+
+            if self.has_right_child(index):
+                # get the right child
+                right_child_index = self.right_child(index)
+
+                # now we have to check if it is the smallest
+                if self._min_heap[smallest_element_index] > self._min_heap[right_child_index]:
+                    smallest_element_index = right_child_index
+
+            # swap if parent is greater than the smallest child
+            if self._min_heap[smallest_element_index] > self._min_heap[index]:
+                # swap
+                self.swap(index, smallest_element_index)
+
+            # next iteration
+            index = smallest_element_index
+
+    def _heapify_down(self, index):
+        while self.has_left_child(index):
+            # retrieve the smallest index
+            smallest_index = self.get_smallest_child_index(index)
+
+            # exit loop when is_leaf
+            if self.is_leaf(index):
+                break
+
+            # swap
+            self.swap(index, smallest_index)
+
+            # to the next iteration
+            index = smallest_index
 
     @override
     def heapify(self, list_of_elements: List[T]) -> 'MinHeap[T]':
-        """Heapifies the list to make a MinHeap from an input list.
+        """Heapify the list to make a MinHeap from an input list.
 
         Args:
-            arr (list[int]): the list of data to heapify.
+            list_of_elements (list[int]): the list of data to heapify.
 
         Examples:
             Example 1.
             MinHeap([]) - empty heap
-            arr = [12, 15, 25, 16, 3] - input array
+            list_of_elements = [12, 15, 25, 16, 3] - input array
             returns: MinHeap([3, 12, 25, 16, 15]) - result
 
             Example 2.
@@ -142,22 +220,20 @@ class MinHeap[T](MinHeapInterface):
             It returns the MinHeap (self).
         """
 
-
-        self.insert_many(arr)
-
+        self.insert_many(list_of_elements)
 
         return self
 
     def _heapify(self, list_of_elements: List[T]) -> 'MinHeap[T]':
-        """Heapifies the list to make a MinHeap from an input list.
+        """Heapify the list to make a MinHeap from an input list.
 
         Args:
-            arr (list[int]): the list of data to heapify.
+            list_of_elements (list[int]): the list of data to heapify.
 
         Examples:
             Example 1.
             MinHeap([]) - empty heap
-            arr = [12, 15, 25, 16, 3] - input array
+            list_of_elements = [12, 15, 25, 16, 3] - input array
             returns: MinHeap([3, 12, 25, 16, 15]) - result
 
             Example 2.
@@ -182,3 +258,10 @@ class MinHeap[T](MinHeapInterface):
             self.heapify_up(index)
 
         return self
+
+    @override
+    def get_smallest_child_index(self, index: int) -> int:
+        if self.has_right_child(index):
+            return min(self.left_child(index), self.right_child(index), key=lambda i: self._min_heap[i])
+
+        return self.left_child(index)

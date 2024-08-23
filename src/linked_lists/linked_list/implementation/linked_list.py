@@ -26,10 +26,14 @@ class LinkedList[T](LinkedListInterface):
 
     """
 
-    def __init__(self):
+    def __init__(self, *args: Optional[T]):
         self._head: Optional[NodeType[T]] = None
         self.size: int = 0
         self._hash_set: Set[NodeType[T]] = set()
+
+        if len(args) > 0:
+            for arg in args:
+                self.add_to_front(arg)
 
     @override
     def add_to_front(self, data: Union[T, NodeType[T]]) -> Optional[ResultType[NodeType[T], str]]:
@@ -102,44 +106,35 @@ class LinkedList[T](LinkedListInterface):
         # use the position to identify
         # where to insert the node
         if position == 0:
-            # add to the front case
-            if not self._head:
-                # create new head
-                self._head = new_node
+            match self._head:
+                case head if head is not None:
+                    # arrange the node in the list
+                    new_node.next = self._head
 
-                if hasattr(self, '_tail'):
-                    setattr(self, '_tail', new_node)
-            else:
-                # arrange the node in the list
-                new_node.next = self._head
+                    # update the head
+                    self._head = new_node
+                case None:
+                    # create new head
+                    self._head = new_node
 
-                # update the head
-                self._head = new_node
-        elif position == -1:
-            if hasattr(self, "_tail"):
-                # arrange the node in the doubly-linked list
-                tail = getattr(self, "_tail")
+                    if hasattr(self, '_tail'):
+                        setattr(self, '_tail', new_node)
+                case _:
+                    return ResultType(error="Something wrong!")
+        elif position == -1 and hasattr(self, "_tail"):
+            # arrange the node in the doubly-linked list
+            tail = getattr(self, "_tail")
+            try:
+                # arrange the tail in the list
+                setattr(tail, 'next', new_node)
 
-                try:
-                    # arrange the tail in the list
-                    setattr(tail, 'next', new_node)
+                # maintain the prev pointer
+                new_node.prev = tail
 
-                    # maintain the prev pointer
-                    new_node.prev = tail
-
-                    # update the tail
-                    setattr(self, '_tail', new_node)
-                except AttributeError as e:
-                    return ResultType(error=f"{e!r}")
-            else:
-                # potential bug
-                tail = self[-1]
-
-                # arrange them in the list
-                tail.next = new_node
-
-                tail = new_node
-                return ResultType(value=tail)
+                # update the tail
+                setattr(self, '_tail', new_node)
+            except AttributeError as e:
+                return ResultType(error=f"{e!r}")
         else:
             for index, node in enumerate(self.traverse()):
                 if index == position - 1:
@@ -442,7 +437,7 @@ class LinkedList[T](LinkedListInterface):
         return None  # raise exception
 
     @override
-    def find_by_data(self, data: T) -> Optional[NodeType[T]]:
+    def find_by_data(self, data: T) -> int:
         """
         Searches for a node in the linked list by its data.
 
@@ -464,9 +459,9 @@ class LinkedList[T](LinkedListInterface):
             >>> ll = LinkedList[int]()
             >>> ll.add_to_front(10)
             >>> ll.add_to_front(5)
-            >>> found_node = ll.find_by_data(10)
-            >>> found_node.data
-            10
+            >>> found_node_index = ll.find_by_data(10)
+            >>> found_node_index
+            1
             >>> ll.find_by_data(3)
             -1
         """
@@ -480,11 +475,11 @@ class LinkedList[T](LinkedListInterface):
                 raise UnsupportedComparisonException(f"The type {type(data)} does not support comparison '__eq__'."
                                                      f"The specified type does not implement the comparison.")
 
-        for node in self.traverse():
+        for i, node in enumerate(self.traverse()):
             if node.data == data:
-                return node
+                return i
 
-        return None  # not found
+        return -1  # not found
 
     @override
     def find_by_params(self, search_param: Dict[str, Union[str, int, float]]) -> Optional[NodeType[T]]:

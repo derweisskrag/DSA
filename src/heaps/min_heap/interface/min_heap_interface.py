@@ -10,6 +10,9 @@ class MinHeapInterface[T](ABC):
     def peek(self) -> None: ...
 
     @abstractmethod
+    def get_peek(self) -> T: ...
+
+    @abstractmethod
     def is_empty(self) -> bool: ...
 
     @abstractmethod
@@ -53,6 +56,10 @@ class MinHeapInterface[T](ABC):
 
     @abstractmethod
     def heapify(self, list_of_elements: List[T]) -> None: ...
+
+    @abstractmethod
+    def get_smallest_child_index(self, index: int) -> int: ...
+
 
 
 

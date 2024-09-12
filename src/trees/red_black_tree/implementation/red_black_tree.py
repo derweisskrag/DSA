@@ -1,9 +1,9 @@
 from typing import Optional, Tuple, Union, override
 
-from src.linked_lists.types.ResultType import ResultType
-from src.trees.enums.rbtree_colours import Color
-from src.trees.red_black_tree.interface.red_black_tree_interface import RBTreeInterface
-from src.trees.types.red_black_tree_node import NIL, Node
+from src.types.ResultType import ResultType
+from src.types.enums.rbtree_colours import Color
+from src.interfaces.red_black_tree_interface import RBTreeInterface
+from src.types.nodes.red_black_tree_node import NIL, Node
 
 """
 This module contains the Red-black tree implementation

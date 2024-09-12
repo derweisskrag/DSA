@@ -1,9 +1,9 @@
 from typing import override, Iterable
 
-from src.linked_lists.Exceptions.LinkedListEmptyException import LinkedListEmptyException
+from src.types.errors.LinkedListEmptyException import LinkedListEmptyException
 from src.linked_lists.linked_list.implementation.linked_list import LinkedList
-from src.linked_lists.types.ResultType import ResultType
-from src.queues.queue.interface.queue_interface import QueueInterface
+from src.types.ResultType import ResultType
+from src.interfaces.queue_interface import QueueInterface
 
 
 class Queue[T](QueueInterface):

@@ -1,16 +1,16 @@
 """Contains the linked list class"""
 from typing import Optional, override, Iterable, Union, Dict, Set, Type, List
 
-from ...Exceptions.AttributeNotFoundException import AttributeNotFoundException
-from ...Exceptions.DataclassNotUsedException import DataclassNotUsedException
-from ...Exceptions.InvalidSearchParameterException import InvalidSearchParameterException
-from ...Exceptions.LinkedListEmptyException import LinkedListEmptyException
-from ...Exceptions.NodeNotFoundException import NodeNotFoundException
-from ...Exceptions.UnsupportedComparisonException import UnsupportedComparisonException
-from ...interfaces.linked_list_interface import LinkedListInterface
-from ...types.LinkedListNode import LinkedListNode as Node
-from ...types.NodeType import NodeType
-from ...types.ResultType import ResultType
+from src.interfaces.linked_list_interface import LinkedListInterface
+from src.types.errors.AttributeNotFoundException import AttributeNotFoundException
+from src.types.errors.DataclassNotUsedException import DataclassNotUsedException
+from src.types.errors.InvalidSearchParameterException import InvalidSearchParameterException
+from src.types.errors.LinkedListEmptyException import LinkedListEmptyException
+from src.types.errors.NodeNotFoundException import NodeNotFoundException
+from src.types.errors.UnsupportedComparisonException import UnsupportedComparisonException
+from src.types.nodes.LinkedListNode import LinkedListNode as Node
+from src.types.nodes.NodeType import NodeType
+from src.types.ResultType import ResultType
 
 
 class LinkedList[T](LinkedListInterface):
@@ -93,8 +93,8 @@ class LinkedList[T](LinkedListInterface):
         # Check if position is an integer
         if not isinstance(position, int):
             return ResultType(error=f"Cannot insert the node into the linked list due to wrong"
-                              f"specified type of 'position' argument: {type(position)}"
-                              f"must be 'integer'.")
+                                    f"specified type of 'position' argument: {type(position)}"
+                                    f"must be 'integer'.")
 
         # Create a new node if data is not already a Node
         if not isinstance(data, Node):
@@ -233,7 +233,9 @@ class LinkedList[T](LinkedListInterface):
             self.remove_head()
         else:
             # the node to delete is not head, so find it
-            removed_node = self.find_by_data(data)
+            removed_node_index = self.find_by_data(data)
+
+            removed_node = self[removed_node_index]
 
             # handle the exception when node is none
             if removed_node is None:

@@ -1,9 +1,9 @@
 from typing import Set, List, override
 
-from src.linked_lists.types.ResultType import ResultType
-from src.queues.Exceptions.empty_queue_exception import EmptyQueueException
-from src.queues.Exceptions.size_management_exception import SizeManagementException
-from src.queues.deque.interface.deque_interface import DequeInterface
+from src.types.ResultType import ResultType
+from src.types.errors.empty_queue_exception import EmptyQueueException
+from src.types.errors.size_management_exception import SizeManagementException
+from src.interfaces.deque_interface import DequeInterface
 from src.queues.queue.implementation.queue_list import Queue
 
 

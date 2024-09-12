@@ -1,8 +1,8 @@
-from typing import Set, override, Iterable
+from typing import override, Iterable
 
-from src.linked_lists.Exceptions.LinkedListEmptyException import LinkedListEmptyException
+from src.types.errors.LinkedListEmptyException import LinkedListEmptyException
 from src.linked_lists.linked_list.implementation.linked_list import LinkedList
-from src.stacks.interface.stack_interface import StackInterface
+from src.interfaces.stack_interface import StackInterface
 
 
 class Stack[T](StackInterface):

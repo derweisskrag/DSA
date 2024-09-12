@@ -1,9 +1,9 @@
 from typing import Set, override, List, Iterable
 
-from src.linked_lists.types.ResultType import ResultType
-from src.queues.Exceptions.empty_queue_exception import EmptyQueueException
-from src.queues.Exceptions.size_management_exception import SizeManagementException
-from src.queues.queue.interface.queue_interface import QueueInterface
+from src.types.ResultType import ResultType
+from src.types.errors.empty_queue_exception import EmptyQueueException
+from src.types.errors.size_management_exception import SizeManagementException
+from src.interfaces.queue_interface import QueueInterface
 
 
 class Queue[T](QueueInterface):

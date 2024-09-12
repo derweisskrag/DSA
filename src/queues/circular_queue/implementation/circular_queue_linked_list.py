@@ -1,8 +1,8 @@
 from typing import override
 
 from src.linked_lists.circular_linked_list.implementation.circular_linked_list import CircularLinkedList
-from src.linked_lists.types.ResultType import ResultType
-from src.queues.circular_queue.interface.circular_queue_interface import CircularQueueInterface
+from src.types.ResultType import ResultType
+from src.interfaces.circular_queue_interface import CircularQueueInterface
 from src.queues.queue.implementation.queue_linked_list import Queue
 
 

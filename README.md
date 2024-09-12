@@ -69,9 +69,3 @@ See LinkedList new functions! Of them:
 - *find_middle*
 - *sort*
 
-<<<<<<< HEAD
-
-
-
-=======
->>>>>>> e45ac33b93178d8f62ffa9910ac787466b21f2bb

@@ -1,8 +1,8 @@
 from typing import List, Set, override
 
-from src.linked_lists.types.ResultType import ResultType
-from src.queues.Exceptions.size_management_exception import SizeManagementException
-from src.queues.circular_queue.interface.circular_queue_interface import CircularQueueInterface
+from src.types.ResultType import ResultType
+from src.types.errors.size_management_exception import SizeManagementException
+from src.interfaces.circular_queue_interface import CircularQueueInterface
 from src.queues.queue.implementation.queue_list import Queue
 
 

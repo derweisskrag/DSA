@@ -1,6 +1,6 @@
 from typing import override, List
 
-from src.heaps.max_heap.interface.max_heap_interface import MaxHeapInterface
+from src.interfaces.max_heap_interface import MaxHeapInterface
 from src.heaps.min_heap.implementation.min_heap import MinHeap
 
 

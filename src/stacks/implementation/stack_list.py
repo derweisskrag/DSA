@@ -1,6 +1,6 @@
 from typing import List, override, Set, Iterable
 
-from src.stacks.interface.stack_interface import StackInterface
+from src.interfaces.stack_interface import StackInterface
 
 
 class Stack[T](StackInterface):

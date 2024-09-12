@@ -1,7 +1,7 @@
 from math import floor, log2
 from typing import List, override, Iterable
 
-from src.heaps.min_heap.interface.min_heap_interface import MinHeapInterface
+from src.interfaces.min_heap_interface import MinHeapInterface
 
 
 class MinHeap[T](MinHeapInterface):

@@ -1,9 +1,9 @@
 from typing import override, Union, Optional, Iterable
 
-from src.linked_lists.interfaces.circular_linked_list_interface import CircularLinkedListInterface
+from src.interfaces.circular_linked_list_interface import CircularLinkedListInterface
 from src.linked_lists.linked_list.implementation.linked_list import LinkedList
-from src.linked_lists.types.NodeType import NodeType
-from src.linked_lists.types.ResultType import ResultType
+from src.types.nodes.NodeType import NodeType
+from src.types.ResultType import ResultType
 
 
 class CircularLinkedList[T](CircularLinkedListInterface, LinkedList):

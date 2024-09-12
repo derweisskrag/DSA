@@ -1,12 +1,11 @@
 from typing import Optional, Iterable, override, Union
 
-from src.linked_lists.Exceptions.LinkedListEmptyException import LinkedListEmptyException
-from src.linked_lists.Exceptions.NodeNotFoundException import NodeNotFoundException
-from src.linked_lists.interfaces.doubly_linked_list_interface import DoublyLinkedListInterface
+from src.types.errors.LinkedListEmptyException import LinkedListEmptyException
+from src.interfaces.doubly_linked_list_interface import DoublyLinkedListInterface
 from src.linked_lists.linked_list.implementation.linked_list import LinkedList
-from src.linked_lists.types.DoublyLinkedListNode import DoublyLinkedListNode as Node
-from src.linked_lists.types.NodeType import NodeType
-from src.linked_lists.types.ResultType import ResultType
+from src.types.nodes.DoublyLinkedListNode import DoublyLinkedListNode as Node
+from src.types.nodes.NodeType import NodeType
+from src.types.ResultType import ResultType
 
 
 class DoublyLinkedList[T](LinkedList, DoublyLinkedListInterface):

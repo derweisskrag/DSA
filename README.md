@@ -22,50 +22,19 @@ functionality.
 
 ### List of topics
 
-The course teaches about
+# Data Structures and Algorithms
 
-1. Linked lists
-2. Stacks and Queues
-3. Graphs
-4. Trees
-5. HashTables
-6. UnionFind
-7. Sorting algorithms
-8. Searching algorithms
-9. Dijkstra, Kruskal, and Prim algorithms
-10. Patterns
+This repository contains implementations of various data structures and algorithms.
 
+## Contents
 
-## Server
+- [LinkedList](./src/linked_lists/linked_list/implementation/linked_list.py)
+- [CircularLinkedList](./src/linked_lists/circular_linked_list/implementation/circular_linked_list.py)
+- [DoublyLinkedList](./src/linked_lists/doubly_linked_list/implementation/doubly_linked_list.py)
 
-This is how I might serve this course as an application.
+## LinkedList
 
-## Suggestions
+The LinkedList implementation includes all methods for a doubly linked list, with arguments passed via `super()`.
 
-This sections provides the lecture material review and recap. The purpose of it is to help
-students to prepare for midterms, colloquiums and, most importantly, exams.
-
-### How is it done?
-
-There is no need to rewrite lecture materials, so I decided to summarize each lecture
-and provide illustrations, examples, and others. In other words, I contributed to the
-DSA course.
-
-
-### Innovations! Coming to the 1.1 version of DSA (current 1.0)
-
-- *RBTree*
-- *Skip lists*
-- *Empowered linked list*
-- *BST - Binary search tree*
-- *AVL*
-- *HaspMap*, and *Unordered map*
-- *MaxHeap*
-- *Bi-heap*
-- *Priority Queue*
-
-See LinkedList new functions! Of them:
-
-- *find_middle*
-- *sort*
+- [LinkedList Code](./src/linked_lists/linked_list/implementation/linked_list.py)
 

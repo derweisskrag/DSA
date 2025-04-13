@@ -40,5 +40,5 @@ The LinkedList implementation includes all methods for a doubly linked list, wit
 
 ## Alpha Deploy
 
-13.04.2025 -> 0.1
+13.04.2025 -> 0.1.2
 

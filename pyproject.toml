@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "dsa_kuuking"
+version = "0.1.2"
+description = "A personal DSA library with CRUD implementations for lists, queues, heaps, stacks, and trees."
+readme = "README.md"
+requires-python = ">=3.12"
+
+authors = [
+    { name = "Sergei Ivanov" }
+]
+
+license = { text = "MIT" }
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+

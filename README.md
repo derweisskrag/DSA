@@ -38,3 +38,7 @@ The LinkedList implementation includes all methods for a doubly linked list, wit
 
 - [LinkedList Code](./src/linked_lists/linked_list/implementation/linked_list.py)
 
+## Alpha Deploy
+
+13.04.2025 -> 0.1
+

@@ -1,5 +1,51 @@
+# Environmental variables
+.env.*
+.env
+!.env.example
 
-# ignore idea
-.idea
+# Pycache
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
 
-# ignore
+# Testing, coverage, logs
+coverage/
+htmlcov/
+*.cover
+*.log
+*.tmp
+*.bak
+*.swp
+*.DS_Store
+.pytest_cache/
+
+# IDE -> Code editors
+.vscode/
+.idea/
+*.code-workspace
+*.sublime-project
+*.sublime-workspace
+*.pydevproject
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+Pipfile.lock
+poetry.lock
+
+# Build artefacts
+build/
+dist/
+*.egg-info/
+*.eggs/
+*.whl
+
+# PyCharm & IntelliJ IDEA
+*.iml
+*.ipr
+*.iws
+
+

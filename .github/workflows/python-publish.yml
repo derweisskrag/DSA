@@ -1,0 +1,32 @@
+name: Publish to TestPyPI
+
+on:
+  push:
+    branches: [main]  # or 'release' or 'publish' depending on your strategy
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - name: Install build and twine
+        run: |
+          python -m pip install --upgrade build twine
+
+      - name: Build the package
+        run: |
+          python -m build
+
+      - name: Publish to TestPyPI
+        env:
+          TWINE_USERNAME: __token__
+          TWINE_PASSWORD: ${{ secrets.DSA_KUUKING_TOKEN }}
+        run: |
+          twine upload --repository-url https://test.pypi.org/legacy/ dist/*

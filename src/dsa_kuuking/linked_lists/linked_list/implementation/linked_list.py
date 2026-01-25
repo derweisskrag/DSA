@@ -105,6 +105,22 @@ class LinkedList[T](LinkedListInterface):
             new_node = data
         # use the position to identify
         # where to insert the node
+
+        # Handle HEAD
+        match self._head:
+                case head if head is not None:
+                    pass # ignore
+                case None:
+                    # create new head
+                    # creates
+                    self._head = new_node
+
+                    if hasattr(self, '_tail'):
+                        setattr(self, '_tail', new_node)
+                case _:
+                    return ResultType(error="Something wrong!")
+
+        
         if position == 0:
             match self._head:
                 case head if head is not None:
@@ -114,11 +130,7 @@ class LinkedList[T](LinkedListInterface):
                     # update the head
                     self._head = new_node
                 case None:
-                    # create new head
-                    self._head = new_node
-
-                    if hasattr(self, '_tail'):
-                        setattr(self, '_tail', new_node)
+                    pass # now we ignore this
                 case _:
                     return ResultType(error="Something wrong!")
         elif position == -1 and hasattr(self, "_tail"):
@@ -127,8 +139,6 @@ class LinkedList[T](LinkedListInterface):
             try:
                 # arrange the tail in the list
                 setattr(tail, 'next', new_node)
-                if self._head is None:
-                    self._head = new_node
                     
                 # maintain the prev pointer
                 new_node.prev = tail

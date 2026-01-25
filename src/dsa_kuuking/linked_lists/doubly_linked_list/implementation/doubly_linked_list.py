@@ -48,6 +48,7 @@ class DoublyLinkedList[T](LinkedList, DoublyLinkedListInterface):
     def __init__(self) -> None:
         super().__init__()
         self._tail: Optional[Node[T]] = None
+        self._head: Optional[Node[T]] = None
 
     @override
     def get_tail(self) -> ResultType[NodeType[T], str]:

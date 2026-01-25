@@ -127,8 +127,8 @@ class LinkedList[T](LinkedListInterface):
             try:
                 # arrange the tail in the list
                 setattr(tail, 'next', new_node)
-                if self.head is None:
-                    self.head = new_node
+                if self._head is None:
+                    self._head = new_node
                     
                 # maintain the prev pointer
                 new_node.prev = tail

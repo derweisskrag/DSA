@@ -10,29 +10,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.x"
-
-      - name: Install Dependencies
-        run: |
-          python -m pip install --upgrade pip
-          python -m pip install maturin twine
-
-      - name: Install Rust
-        uses: dtolnay/rust-toolchain@stable
-
-      - name: Build with Maturin
-        run: |
-          maturin build --release --manylinux 2014 --interpreter python3
-
-      - name: Check Build Output
-        run: ls -R dist/
-
-      - name: Publish to TestPyPI
+      - name: Build and Publish
+        # This action automatically uses a Docker container for manylinux
+        uses: PyO3/maturin-action@v1
         env:
-          TWINE_USERNAME: __token__
-          TWINE_PASSWORD: ${{ secrets.KUUKING_DSA_TOKEN }}
-        run: |
-          twine upload --repository-url https://test.pypi.org/legacy/ dist/*.whl --verbose
+          # Use your TestPyPI token here
+          MATURIN_PYPI_TOKEN: ${{ secrets.KUUKING_DSA_TOKEN }}
+          # Tell it to use TestPyPI instead of real PyPI
+          MATURIN_REPOSITORY_URL: https://test.pypi.org/legacy/
+        with:
+          command: publish
+          # This 'manylinux' setting triggers the Docker container build
+          args: --manylinux 2014 --interpreter python3 --manifest-path rust_queue/Cargo.toml

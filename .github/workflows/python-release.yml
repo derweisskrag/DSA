@@ -23,6 +23,4 @@ jobs:
           MATURIN_PYPI_TOKEN: ${{ secrets.BURMESE_NATIVE }}
         with:
           command: publish
-          args: --release --interpreter python3
-          # Point to your specific manifest
-          manifest-path: rust_queue/Cargo.toml
+          args: --release --interpreter python3 --manifest-path rust_queue/Cargo.toml

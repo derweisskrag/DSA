@@ -20,20 +20,20 @@ to equip students with the ability to efficiently implement these algorithms in 
 programming language, ensuring a comprehensive understanding of their application and
 functionality.
 
-### List of topics
+## List of topics
 
-# Data Structures and Algorithms
+### Data Structures and Algorithms
 
 This repository contains implementations of various data structures and algorithms.
 
-## Contents
+### Contents
 
 - LinkedList
 - CircularLinkedList
 - DoublyLinkedList
 - PriorityQueue
 
-## LinkedList
+### LinkedList
 
 The LinkedList implementation includes all methods for a doubly linked list, with arguments passed via `super()`.
 

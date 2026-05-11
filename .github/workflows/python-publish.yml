@@ -20,9 +20,12 @@ jobs:
         run: |
           python -m pip install --upgrade build twine
 
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
       - name: Build the package
         run: |
-          python -m build
+          python -m build --config-setting="--build-option=--manylinux 2014"
 
       - name: Publish to TestPyPI
         env:

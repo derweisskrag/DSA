@@ -28,17 +28,13 @@ This repository contains implementations of various data structures and algorith
 
 ## Contents
 
-- [LinkedList](./src/linked_lists/linked_list/implementation/linked_list.py)
-- [CircularLinkedList](./src/linked_lists/circular_linked_list/implementation/circular_linked_list.py)
-- [DoublyLinkedList](./src/linked_lists/doubly_linked_list/implementation/doubly_linked_list.py)
+- LinkedList
+- CircularLinkedList
+- DoublyLinkedList
+- PriorityQueue
 
 ## LinkedList
 
 The LinkedList implementation includes all methods for a doubly linked list, with arguments passed via `super()`.
 
-- [LinkedList Code](./src/linked_lists/linked_list/implementation/linked_list.py)
-
-## Alpha Deploy
-
-13.04.2025 -> 0.1.2
-
+- LinkedList Code

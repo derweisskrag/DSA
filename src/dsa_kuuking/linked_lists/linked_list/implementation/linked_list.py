@@ -8,9 +8,15 @@ from dsa_kuuking.types.errors.InvalidSearchParameterException import InvalidSear
 from dsa_kuuking.types.errors.LinkedListEmptyException import LinkedListEmptyException
 from dsa_kuuking.types.errors.NodeNotFoundException import NodeNotFoundException
 from dsa_kuuking.types.errors.UnsupportedComparisonException import UnsupportedComparisonException
-from dsa_kuuking.types.nodes.LinkedListNode import LinkedListNode as Node
 from dsa_kuuking.types.nodes.NodeType import NodeType
+
+# Import the ResultType inspired by the Rust Result type, which can represent either a success (Ok) or an error (Err).
 from dsa_kuuking.types.ResultType import ResultType
+
+# Import the types
+from dsa_kuuking.types.nodes.LinkedListNode import LinkedListNode
+from dsa_kuuking.types.nodes.DoublyLinkedListNode import DoublyLinkedListNode
+from dsa_kuuking.types.nodes.CircularLinkedListNode import CircularLinkedListNode
 
 
 class LinkedList[T](LinkedListInterface):
@@ -22,18 +28,32 @@ class LinkedList[T](LinkedListInterface):
     removing nodes, and checking if the list is empty.
 
     Attributes:
-        _head (Optional[Node[T]]): The head node of the linked list. Initialized to None.
+        _head (Optional[NodeType[T]]): The head node of the linked list. Initialized to None.
 
     """
 
     def __init__(self, *args: Optional[T]):
         self._head: Optional[NodeType[T]] = None
         self.size: int = 0
-        self._hash_set: Set[NodeType[T]] = set()
+        # Remove the MEMORY PARASITE: HashSet<T> is not the place for our SLIM Linked List
+        # Will add the type:
+        self._type = 0 # See the 'insert_node' method for the use of this type attribute
+        # 0 - singly
+        # 1 - doubly
+        # KEEP IN MIND: We still use 'NodeType' because other linked lists extend this class.
 
         if len(args) > 0:
             for arg in args:
                 self.add_to_front(arg)
+
+    def clear(self):
+        """Clears the linked list by resetting the head and size."""
+        self._head = None
+        # handle the tail as well
+        if hasattr(self, '_tail'):
+            setattr(self, '_tail', None)
+
+        self.size = 0
 
     @override
     def add_to_front(self, data: Union[T, NodeType[T]]) -> Optional[ResultType[NodeType[T], str]]:
@@ -92,14 +112,21 @@ class LinkedList[T](LinkedListInterface):
 
         # Check if position is an integer
         if not isinstance(position, int):
+            # This has been updated to use OK as a subclass of ResultType, which is more appropriate for this case.
+            # TODO: Impl this logic
             return ResultType(error=f"Cannot insert the node into the linked list due to wrong"
                                     f"specified type of 'position' argument: {type(position)}"
                                     f"must be 'integer'.")
 
         # Create a new node if data is not already a Node
-        if not isinstance(data, Node):
+        if not isinstance(data, (LinkedListNode, DoublyLinkedListNode, CircularLinkedListNode)):
             # initialize the node to insert
-            new_node = Node(data)
+            # HERE: We can now match the type of the linked list to determine whether to create a singly or doubly linked node.
+            match self._type:
+                case 0:
+                    new_node = LinkedListNode(data)
+                case 1:
+                    new_node = DoublyLinkedListNode(data)
         else:
             # data is a Node already
             new_node = data
@@ -123,18 +150,25 @@ class LinkedList[T](LinkedListInterface):
                     return ResultType(error="Something wrong!")
         elif position == -1 and hasattr(self, "_tail"):
             # arrange the node in the doubly-linked list
-            tail = getattr(self, "_tail")
-            try:
-                # arrange the tail in the list
-                setattr(tail, 'next', new_node)
+            # if empty - Fixed the problem with "_head"
+            # Strategy: mirror the "position == 0"
+            if self.is_empty():
+                self._head = new_node
+                setattr(self, "_tail", new_node)
+            else:
+                # If not empty then as usual
+                tail = getattr(self, "_tail")
+                try:
+                    # arrange the tail in the list
+                    setattr(tail, 'next', new_node)
 
-                # maintain the prev pointer
-                new_node.prev = tail
+                    # maintain the prev pointer
+                    new_node.prev = tail
 
-                # update the tail
-                setattr(self, '_tail', new_node)
-            except AttributeError as e:
-                return ResultType(error=f"{e!r}")
+                    # update the tail
+                    setattr(self, '_tail', new_node)
+                except AttributeError as e:
+                    return ResultType(error=f"{e!r}")
         else:
             for index, node in enumerate(self.traverse()):
                 if index == position - 1:
@@ -144,10 +178,37 @@ class LinkedList[T](LinkedListInterface):
         # increment the size
         self.size += 1
 
-        # store this node in the set
-        self._hash_set.add(new_node)
-
         return ResultType(value=new_node)
+
+    def insert_before(self, target_data: Union[T, Node[T]], data: Union[T, Node[T]]) -> Optional[ResultType[Node[T], str]]:
+        if self.is_empty():
+            raise LinkedListEmptyException("Cannot insert before in an empty linked list.")
+
+        # EDGE CASES GUYS: if the target is head, we can just add to front
+        # TODO: I think we can just make it standalone method returning `Bool`
+        # match target_data:
+        #     case node_guy if isinstance(node_guy, NodeType):
+        #         # We got the '__eq__' method implemented for the Node, so we can just compare the node directly.
+        #         if self._head == target_data:
+        #             # Add before head is just adding to front
+        #             return self.add_to_front(data)
+        #     case data_guy if LinkedList.is_primitive_type(type(data_guy)):
+        #         if self._head.data == target_data:
+        #             # Add before head is just adding to front
+        #             return self.add_to_front(data)
+        # Simplified Logic
+        if self._head.data == target_data or (self._head == target_data if isinstance(target_data, NodeType) else False):
+            # Add before head is just adding to front
+            return self.add_to_front(data)
+
+        # Find the dam position
+        position_to_insert = self.find_position_by_node_or_data(target_data if isinstance(target_data, NodeType) else target_data)
+
+        # Clever, Copilot! We cannot afford position_to_insert to be -1, because we have already handled the case when the target is head, so if it is -1, it means we cannot find the target in the linked list.
+        if position_to_insert != -1:
+            return self.insert_node(data, position_to_insert)
+
+        raise NodeNotFoundException(f"Could not find the target data {target_data} to insert before.")
 
     @override
     def remove_by_id(self, node_id: int) -> Optional[NodeType[T]]:
@@ -241,9 +302,6 @@ class LinkedList[T](LinkedListInterface):
             if removed_node is None:
                 raise NodeNotFoundException()
 
-            # remove it from set
-            self._hash_set.remove(removed_node)
-
             # find the spot
             spot_node = self.find_spot(removed_node)
 
@@ -298,7 +356,7 @@ class LinkedList[T](LinkedListInterface):
         removed_node = self._head
 
         # remove from set
-        self._hash_set.remove(removed_node)
+        # self._hash_set.remove(removed_node)
 
         # update the head
         self._head = self._head.next
@@ -383,6 +441,73 @@ class LinkedList[T](LinkedListInterface):
                 print(node, end="->" if node.next else "\n")
         except LinkedListEmptyException as e:
             print(f"Cannot traverse empty linked list: {e!r}")
+
+    # The "Bare Metal" Memory-Safe Way
+    def count_occurrences_fast(self, target_data: Union[T, NodeType[T]]) -> int:
+        target_val = target_data.data if isinstance(data, (LinkedListNode, DoublyLinkedListNode, CircularLinkedListNode)) else target_data
+        count = 0
+        for node in self.traverse():
+            if node.data == target_val:
+                count += 1
+        return count
+
+
+    def count_occurrences(self, target_data: Union[T, NodeType[T]]) -> int:
+        """
+        Counts the number of occurrences of a specific data value in the linked list.
+
+        This method traverses the linked list and counts how many nodes contain the
+        specified data value. It returns an integer representing the total count of
+        occurrences.
+
+        Args:
+            data (T): The data value to count in the linked list. The type is specified
+                      by the generic parameter `T`, allowing for any data type.
+
+        Returns:
+            int: The number of nodes in the linked list that contain the specified data value.
+        """
+        # Initialize the HASH MAP
+        count_map = {}
+        for _, node in enumerate(self.traverse()):
+            if node.data in count_map:
+                count_map[node.data] += 1
+            else:
+                count_map[node.data] = 1
+
+
+
+        ret = count_map.get(target_data.data if isinstance(data, (LinkedListNode, DoublyLinkedListNode, CircularLinkedListNode)) else target_data, 0)
+        # ZIG BRAIN KICK IN
+        # TODO: Analyze later
+        del count_map
+        return ret
+
+
+    def find_position_by_node_or_data(self, target_node: Union[T, NodeType[T]]) -> int:
+        """
+        Finds the position of a node in the linked list based on its data or node reference.
+
+        This method searches through the linked list to find the position of a node that matches
+        either the provided data or the node reference. If a matching node is found, its position
+        (zero-based index) is returned. If no matching node is found, the method returns `None`.
+
+        Args:
+            target_node (Union[T, Node[T]]): The data value or node reference to search for in the linked list.
+
+        Returns:
+            int: The zero-based index of the node if found; otherwise, raises a ValueError.
+        """
+        for i, node in enumerate(self.traverse()):
+            match target_node:
+                case node_guy if isinstance(data, (LinkedListNode, DoublyLinkedListNode, CircularLinkedListNode)):
+                    if node_guy.get_id() == node.get_id():
+                        return i
+                case data_guy if LinkedList.is_primitive_type(type(data_guy)):
+                    if data_guy == node.data:
+                        return i
+                case _:
+                    raise ValueError(f"Unsupported type for target_node: {type(target_node)}. Must be either a Node or a primitive data type.")
 
     @override
     def find_by_id(self, node_id: int) -> Optional[NodeType[T]]:
@@ -984,7 +1109,8 @@ class LinkedList[T](LinkedListInterface):
             >>> node4 in ll # because node4.next is None, while node2.next is node1
             False
         """
-        return item in self._hash_set
+        return any(node.get_id() == item.get_id() for node in self.traverse())
+        # return item in self._hash_set
 
     def __len__(self) -> int:
         """

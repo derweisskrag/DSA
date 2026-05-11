@@ -4,6 +4,8 @@ from typing import Optional
 
 
 class LinkedListNode[T]:
+    """A node in a linked list."""
+    __slots__ = ['_data', 'next', '_id']
     def __init__(self, data: T):
         self._data = data
         self.next: Optional['LinkedListNode[T]'] = None
@@ -20,4 +22,9 @@ class LinkedListNode[T]:
 
     def __repr__(self):
         return f"Node(data={self.data})"
+
+    def __eq__(self, other):
+        if not isinstance(other, LinkedListNode):
+            return NotImplemented
+        return self.data == other.data and self.get_id() == other.get_id()
 

@@ -48,4 +48,9 @@ dist/
 *.ipr
 *.iws
 
+# Rust
+/target/
+*/target/*
+
+
 

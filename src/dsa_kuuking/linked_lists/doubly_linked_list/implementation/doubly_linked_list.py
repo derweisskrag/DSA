@@ -48,6 +48,8 @@ class DoublyLinkedList[T](LinkedList, DoublyLinkedListInterface):
     def __init__(self) -> None:
         super().__init__()
         self._tail: Optional[Node[T]] = None
+        self._type = 1 # See the 'insert_node' method for the use of this type attribute
+        # Now it is doubly-linked list
 
     @override
     def get_tail(self) -> ResultType[NodeType[T], str]:
@@ -67,6 +69,15 @@ class DoublyLinkedList[T](LinkedList, DoublyLinkedListInterface):
     @override
     def insert_node(self, data: Union[T, Node[T]], position: int) -> Optional[ResultType[Node[T], str]]:
         return super().insert_node(data, position)
+
+    def insert_before(self, target_data: T, data: Union[T, Node[T]]) -> Optional[ResultType[Node[T], str]]:
+        if self.is_empty():
+            raise LinkedListEmptyException("Cannot insert before in an empty doubly-linked list.")
+
+        if self._head.data == target_data:
+            return self.add_to_front(data)
+
+        return super().insert_before(target_data, data)
 
     @override
     def remove_tail(self) -> Optional[Node[T]]:

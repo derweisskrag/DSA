@@ -4,7 +4,7 @@ build-backend = "maturin"
 
 [project]
 name = "dsa_kuuking"
-version = "0.1.9"
+version = "0.1.8"
 description = "A personal DSA library with CRUD implementations for lists, queues, heaps, stacks, and trees."
 readme = "README.md"
 requires-python = ">=3.12"

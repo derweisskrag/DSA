@@ -2,12 +2,11 @@ name: Publish to TestPyPI
 
 on:
   push:
-    branches: [main]  # or 'release' or 'publish' depending on your strategy
+    branches: [main]
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v4
 
@@ -26,10 +25,10 @@ jobs:
 
       - name: Build with Maturin
         run: |
-          # We use the 'build' command directly. 
-          # --release optimizes the Rust code.
-          # --manylinux 2014 fixes the platform tag.
           maturin build --release --manylinux 2014 --interpreter python3
+
+      - name: Check Build Output
+        run: ls -R dist/
 
       - name: Publish to TestPyPI
         env:

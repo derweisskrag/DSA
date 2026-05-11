@@ -1,6 +1,8 @@
 use pyo3::prelude::*;
 use std::sync::Mutex; // Add this for thread safety
 
+// Burmese Python Queue
+
 #[pyclass]
 pub struct PriorityQueue {
     // Wrap the Vec in a Mutex so multiple threads can't corrupt it

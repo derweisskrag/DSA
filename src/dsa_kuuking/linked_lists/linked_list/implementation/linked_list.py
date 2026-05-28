@@ -46,6 +46,28 @@ class LinkedList[T](LinkedListInterface):
             for arg in args:
                 self.add_to_front(arg)
 
+
+    # NEW! Added helpted method
+    def instantiate_new_node(self, value):
+        # Create a new node if data is not already a Node
+        if not self.is_node(value):
+            # initialize the node to insert
+            # HERE: We can now match the type of the linked list to determine whether to create a singly or doubly linked node.
+            match self._type:
+                case 0:
+                    new_node = LinkedListNode(value)
+                case 1:
+                    new_node = DoublyLinkedListNode(value)
+            
+            # Hopefully: THIS WORKS
+            # Because I am not sure yet
+            return new_node
+        else:
+            return value
+        
+    def is_node(self, value):
+        return isinstance(value, (LinkedListNode, DoublyLinkedListNode, CircularLinkedListNode))
+
     def clear(self):
         """Clears the linked list by resetting the head and size."""
         self._head = None
@@ -114,22 +136,16 @@ class LinkedList[T](LinkedListInterface):
         if not isinstance(position, int):
             # This has been updated to use OK as a subclass of ResultType, which is more appropriate for this case.
             # TODO: Impl this logic
+            # Can also update further
             return ResultType(error=f"Cannot insert the node into the linked list due to wrong"
                                     f"specified type of 'position' argument: {type(position)}"
                                     f"must be 'integer'.")
 
         # Create a new node if data is not already a Node
-        if not isinstance(data, (LinkedListNode, DoublyLinkedListNode, CircularLinkedListNode)):
-            # initialize the node to insert
-            # HERE: We can now match the type of the linked list to determine whether to create a singly or doubly linked node.
-            match self._type:
-                case 0:
-                    new_node = LinkedListNode(data)
-                case 1:
-                    new_node = DoublyLinkedListNode(data)
-        else:
-            # data is a Node already
-            new_node = data
+        # If works nicely then it handles the type for us
+        new_node = self.instantiate_new_node(data)
+
+
         # use the position to identify
         # where to insert the node
         if position == 0:
@@ -170,45 +186,68 @@ class LinkedList[T](LinkedListInterface):
                 except AttributeError as e:
                     return ResultType(error=f"{e!r}")
         else:
+            # NEW! Fixing the 'prev' pointer
             for index, node in enumerate(self.traverse()):
                 if index == position - 1:
-                    new_node.next = node.next
-                    node.next = new_node
+                    self.insert_after(node, new_node)
 
         # increment the size
         self.size += 1
 
         return ResultType(value=new_node)
+    
+
+    def insert_after(self, where_node, what_node_or_value):
+        if where_node not in self:
+            return ResultType(error="Bro, you what? You dawg, it aint in the list")
+
+        what_node = self.instantiate_new_node(what_node_or_value)
+
+        # From left to right
+        # BURMESE WARNING
+        # what_node.next, what_node.prev, where_node.next.prev, where_node.next = where_node.next, where_node, what_node, what_node
+
+        # Do swap in place
+        what_node.next = where_node.next
+    
+        # BURMESE ALARM
+        if getattr(self, "_tail"):
+            # Yes, in that implementation
+            # PREV
+            setattr(what_node, "prev", where_node)
+
+            # NODE.NEXT.PREV
+            next_node = getattr(where_node, "next")
+            setattr(next_node, "prev", what_node)
+
+        # Restore
+        where_node.next = what_node # Implementation: we add after
+
 
     def insert_before(self, target_data: Union[T, Node[T]], data: Union[T, Node[T]]) -> Optional[ResultType[Node[T], str]]:
         if self.is_empty():
             raise LinkedListEmptyException("Cannot insert before in an empty linked list.")
 
-        # EDGE CASES GUYS: if the target is head, we can just add to front
-        # TODO: I think we can just make it standalone method returning `Bool`
-        # match target_data:
-        #     case node_guy if isinstance(node_guy, NodeType):
-        #         # We got the '__eq__' method implemented for the Node, so we can just compare the node directly.
-        #         if self._head == target_data:
-        #             # Add before head is just adding to front
-        #             return self.add_to_front(data)
-        #     case data_guy if LinkedList.is_primitive_type(type(data_guy)):
-        #         if self._head.data == target_data:
-        #             # Add before head is just adding to front
-        #             return self.add_to_front(data)
-        # Simplified Logic
-        if self._head.data == target_data or (self._head == target_data if isinstance(target_data, NodeType) else False):
+        if self._head.data == target_data: # assuming Node class was modified
             # Add before head is just adding to front
             return self.add_to_front(data)
+        
+        # WARNING: I commented out old code
+        # New Way - mirror of insert_after
+        self.insert_after(target_data.prev, data) # Should do cuz it is mirror, right?
+        # I think yes. 
 
         # Find the dam position
-        position_to_insert = self.find_position_by_node_or_data(target_data if isinstance(target_data, NodeType) else target_data)
+        # O(n) - parasite: remove later
+        # position_to_insert = self.find_position_by_node_or_data(target_data if isinstance(target_data, NodeType) else target_data)
 
         # Clever, Copilot! We cannot afford position_to_insert to be -1, because we have already handled the case when the target is head, so if it is -1, it means we cannot find the target in the linked list.
-        if position_to_insert != -1:
-            return self.insert_node(data, position_to_insert)
+        # Will fix later
+        # if position_to_insert != -1:
+            # return self.insert_node(data, position_to_insert)
 
-        raise NodeNotFoundException(f"Could not find the target data {target_data} to insert before.")
+        # raise NodeNotFoundException(f"Could not find the target data {target_data} to insert before.")
+
 
     @override
     def remove_by_id(self, node_id: int) -> Optional[NodeType[T]]:
@@ -596,7 +635,7 @@ class LinkedList[T](LinkedListInterface):
         if self.is_empty():
             raise LinkedListEmptyException(f"Cannot find the node by specified data {data} in an empty list!")
 
-        if not self.is_primitive_type(type(data)):
+        if not self.is_primitive_type(type(data)) and not isinstance(data, tuple):
             other = data.__class__(**{k: v for k, v in data.__dict__.items()})
             if data != other:
                 raise UnsupportedComparisonException(f"The type {type(data)} does not support comparison '__eq__'."
@@ -604,9 +643,9 @@ class LinkedList[T](LinkedListInterface):
 
         for i, node in enumerate(self.traverse()):
             if node.data == data:
-                return i
+                return i # return the node [NEW!] - Fix later
 
-        return -1  # not found
+        return None  # not found
 
     @override
     def find_by_params(self, search_param: Dict[str, Union[str, int, float]]) -> Optional[NodeType[T]]:
@@ -1199,3 +1238,97 @@ class LinkedList[T](LinkedListInterface):
         # remove it and insert new one into its position
         self.remove_by_data(node_to_replace.data)
         self.insert_node(value, index)
+
+    def reverse_order(self):
+        if not self._head:
+            return None
+
+        new_head = None
+        current = self._head
+
+        while current:
+            current.next, new_head, current = new_head, current, current.next
+
+        self._head = new_head
+        return new_head
+    
+
+    def del_first(self):
+        # My first pointer is actually
+        # THE HEAD
+        # My LinkedList acts like llist_head
+        # But my Node is like llist_node
+        entry = self._head
+        while True:
+            if entry is None:
+                return None
+            
+            next_node = entry.next
+
+
+            if self._head == entry:
+                self._head = next_node
+
+                entry.next = None
+
+                self.size -= 1
+                return entry
+            else:
+                entry = self._head
+
+    def del_first_this(self): 
+        entry = self._head
+        while True:
+            if entry is None:
+                return None
+            
+            next_node = entry.next
+
+            if self.compare_and_swap(entry, next_node):
+                entry.next = None
+                self.size -= 1
+                return entry
+            else:
+                entry = self._head
+
+    def compare_and_swap(self, expected, new_value) -> bool:
+        if self._head is expected:
+            self._head = new_value
+            return True
+        return False
+
+
+    def remove_by_node(self, target_node: NodeType[T]) -> Optional[NodeType[T]]:
+        """
+        Removes a node from the linked list based on a node reference.
+
+        This method searches for the specified node in the linked list and removes it if found.
+        It returns the removed node if the operation is successful, or `None` if the node is not
+        found in the list.
+
+        Args:
+            target_node (Node[T]): The node to be removed from the linked list.
+        """
+        # So, we provide an alternative method (temporary) for 
+        # remove_by_data, which is more efficient because we don't need to compare data values
+        if self.is_empty():
+            raise LinkedListEmptyException("Cannot remove from an empty linked list!")
+        
+        if self._head is target_node:
+            self.remove_head()
+        else:
+            # Ignore tail for now
+            node_to_remove = target_node
+            
+            # Get pointers
+            prev_node = target_node.prev
+            next_node = target_node.next
+
+            # Update pointers
+            if prev_node:
+                prev_node.next = next_node
+            if next_node:
+                next_node.prev = prev_node
+
+            self.size -= 1
+            return node_to_remove

@@ -5,26 +5,56 @@ import heapq
 from bisect import insort
 from typing import Tuple
 
+"""
+WHY MY DOUBLY LINKED LIST IS BETTER THAN HEAPQ FOR PRIORITY QUEUE IMPLEMENTATION:
+
+The Hidden Trap: Lexicographical Tuple Comparison
+Python's PriorityQueue uses heapq under the hood. When elements are pushed into the queue, it compares the tuples item by item (lexicographically).
+It compares the first elements: datetime_a < datetime_b. If they are different, it handles the priority sorting right there.
+
+The Problem: If two items happen to have the exact same timestamp, Python breaks the tie by moving to the second element in the tuple and evaluating: todo_a < todo_b.
+
+If your Todo class doesn't explicitly implement comparison dunder methods (like __lt__), Python will raise a unhandled TypeError:
+
+TypeError: '<' not supported between instances of 'Todo' and 'Todo'
+
+How to Fix It
+You have two clean ways to make this production-ready and bulletproof against identical timestamps.
+
+Option 1: Use an Anti-Tie Counter (Recommended for speed)
+By injecting a strictly increasing integer counter into the tuple, no two tuples will ever have the same first two elements. Python will break the timestamp tie using the counter and will never attempt to look at or compare your Todo objects.
+"""
+
+
 class PriorityQueue[T]:
     def __init__(self):
         self.queue: DoublyLinkedList[Tuple[int, T]] = DoublyLinkedList()
+        self.engine = "PYTHON"  # Default to Python implementation
+
 
     def enqueue(self, item: T, priority: int):
         """Add an item to the queue with a given priority."""
-        # Insert the item in the correct position based on its priority
-        current = self.queue._head
-        while current and current.data[0] <= priority:
-            current = current.next
-        if current:
-            self.queue.insert_before(current, (priority, item))
+        if self.engine == "RUST":
+            self.native_queue.push(priority, item)
+            return
         else:
-            self.queue.add_to_end((priority, item)) # will create our first node
+            # Insert the item in the correct position based on its priority
+            current = self.queue._head
+            while current and current.data[0] <= priority:
+                current = current.next
+            if current:
+                self.queue.insert_before(current, (priority, item))
+            else:
+                self.queue.add_to_end((priority, item)) # will create our first node
 
     def dequeue(self) -> T:
         """Remove and return the item with the highest priority (lowest priority number)."""
-        if self.queue.is_empty():
-            raise IndexError("Dequeue from an empty priority queue")
-        return self.queue.remove_head().data[1]  # Return the item, not the priority
+        if self.engine == "RUST":
+            return self.native_queue.pop()
+        else:
+            if self.queue.is_empty():
+                raise IndexError("Dequeue from an empty priority queue")
+            return self.queue.remove_head().data[1]  # Return the item, not the priority
     
     def peek(self) -> T:
         """Return the item with the highest priority without removing it from the queue."""
@@ -81,12 +111,12 @@ class PriorityQueue[T]:
                 self.enqueue(item, new_priority)
                 return
             current = current.next
-        raise ValueError("Item not found in the priority queue")
+        raise ValueError("Item not found in the priority queue ZZZZ")
 
     def migrate_to_rust(self):
         """The Burmese Eating Protocol."""
         try:
-            from burmese_native import PriorityQueue as RustPQ
+            from dsa_kuuking.burmese_native import PriorityQueue as RustPQ
             rust_pq = RustPQ()
             
             # Batch collect the data
@@ -143,6 +173,26 @@ class PriorityQueueDatetime:
         print("Priority Queue Contents:")
         for priority, item in self.queue:
             print(f" - {item} (Priority: {priority})")
+
+
+
+class UltimatePriorityQueue:
+    def __init__(self):
+        self.buckets = {
+            0: DoublyLinkedList(),  # Critical
+            1: DoublyLinkedList(),  # High
+            2: DoublyLinkedList(),  # Medium
+            3: DoublyLinkedList()   # Low
+        }
+
+    def enqueue(self, item: T, priority: int):
+        self.buckets[priority].add_to_end(item)
+
+    def dequeue(self) -> T:
+        for priority in sorted(self.buckets.keys()):
+            if not self.buckets[priority].is_empty():
+                return self.buckets[priority].remove_head().data
+        raise IndexError("Queue is empty")
 
 
 class DynamicPriorityQueue:

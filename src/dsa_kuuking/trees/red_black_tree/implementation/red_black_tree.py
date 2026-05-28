@@ -594,7 +594,7 @@ def main():
 
     print()
     print("AFTER REMOVAL")
-    rb.remove(10)
+    rb.remove_copilot(8)
     rb.in_order_traverse(rb.root)
 
 

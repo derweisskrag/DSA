@@ -88,7 +88,7 @@ class DoublyLinkedList[T](LinkedList, DoublyLinkedListInterface):
         node_to_remove = self._tail
 
         # remove from set
-        self._hash_set.remove(node_to_remove)
+        # self._hash_set.remove(node_to_remove)
 
         # arrange the linked list
         self._tail = self._tail.prev
@@ -157,3 +157,21 @@ class DoublyLinkedList[T](LinkedList, DoublyLinkedListInterface):
     def __reversed__(self) -> Node[T]:
         for node in self.traverse_backwards():
             yield node
+
+
+    @override
+    def reverse(self):
+        """This method is override for the singly-linked list method. We handle the previous argument.
+        
+        """
+        if not self._head:
+            return None
+
+        curr = self._head
+        while curr:
+            curr.next, curr.prev, curr = curr.prev, curr.next, curr.next
+
+        # swap head and tail
+        self._head, self._tail = self._tail, self._head
+
+        return self    

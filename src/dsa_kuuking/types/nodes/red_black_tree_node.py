@@ -32,7 +32,10 @@ class Node[T]:
 
         # assign pointers
         self.left = NIL()
+        self.left.parent = self # ADD THIS
+        
         self.right = NIL()
+        self.right.parent = self
         self.parent = None  # parent is None, not NIL
 
         # colour is always RED

@@ -1,13 +1,20 @@
 use pyo3::prelude::*;
 use std::sync::Mutex; // Add this for thread safety
 
-// Burmese Python Queue
+// I leave it if I need standalone function example
+#[pyfunction]
+fn calculate_sum(a: i32, b: i32) -> PyResult<i32> {
+    Ok(a + b)
+}
 
+
+// Burmese Python Queue
 #[pyclass]
 pub struct PriorityQueue {
     // Wrap the Vec in a Mutex so multiple threads can't corrupt it
     queue: Mutex<Vec<(i32, PyObject)>>, 
 }
+
 
 #[pymethods]
 impl PriorityQueue {

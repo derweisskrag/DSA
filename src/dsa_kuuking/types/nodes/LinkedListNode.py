@@ -25,6 +25,8 @@ class LinkedListNode[T]:
 
     def __eq__(self, other):
         if not isinstance(other, LinkedListNode):
-            return NotImplemented
-        return self.data == other.data and self.get_id() == other.get_id()
+            return self.data == other # handle the scalar
+        # Alternative to checking by data is just using data
+        # use IS
+        return self is other # and self.get_id() == other.get_id()
 

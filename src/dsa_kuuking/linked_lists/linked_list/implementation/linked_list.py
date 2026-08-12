@@ -1332,3 +1332,5 @@ class LinkedList[T](LinkedListInterface):
 
             self.size -= 1
             return node_to_remove
+
+

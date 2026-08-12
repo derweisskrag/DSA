@@ -95,7 +95,9 @@ REMOVE NODE
 
 class RBTree[T](RBTreeInterface):
     def __init__(self, *args: Optional[Tuple[T]]) -> None:
-        self._root = None
+        self._root = NIL()
+        self.NIL_LEAF = self._root
+        self.size = 0
 
         if len(args) >= 1:
             for key, value in args:
@@ -103,99 +105,27 @@ class RBTree[T](RBTreeInterface):
 
     @override
     def add(self, key: T, value: T) -> None:
-        # create new node
         new_node = Node(key, value)
-
-        match self._root:
-            case _ if self._root is None:
-                # create new root
-                self._root = new_node
-
-                # re-colour
-                self._root.color = Color.BLACK
-            case _ if self._root is not None:
-                # find the spot and insert
-                new_node = self._insert(new_node)
-
-                if not new_node.parent.parent:
-                    return None
-
-                self._fix_insert(new_node)
-
-    def _insert(self, node: Node[T]) -> Node[T]:
-        current = self._root
         parent = None
+        current = self._root
         while not isinstance(current, NIL):
-            parent = current
-            if node.key < current.key:
+            parent = current # Missed
+            if new_node.key < current.key:
                 current = current.left
             else:
                 current = current.right
 
-        node.parent = parent
-
-        if node.key < parent.key:
-            parent.left = node
+        new_node.parent = parent
+        if parent is None:
+            self._root = new_node
+        elif new_node.key < parent.key:
+            parent.left = new_node
         else:
-            parent.right = node
+            parent.right = new_node
 
-        return node
+        self.size += 1
+        self._fix_insert(new_node)
 
-    def remove_copilot(self, key: T) -> Optional[Node[T]]:
-        """
-        Just like BST removal
-
-        Returns
-            Node_to_remove (Node[T]) - removed node
-        """
-
-        node_to_delete = self.find_by_key(key)
-
-        if node_to_delete is None:
-            return None
-
-        removed_color = node_to_delete.color
-        child = None
-
-        if self.is_leaf(node_to_delete):
-            parent = node_to_delete.parent
-            if node_to_delete == node_to_delete.parent.left:
-                parent.left = NIL()
-            elif node_to_delete == node_to_delete.parent.right:
-                parent.right = NIL()
-            node_to_delete.parent = None
-        elif isinstance(node_to_delete.left, NIL) or isinstance(node_to_delete.right, NIL):
-            # node to removed has exactly one child
-            child = node_to_delete.left if self.node_exists(node_to_delete.left) else node_to_delete.right
-            self.transplant(node_to_delete, child)
-        else:
-            # has both children
-            # find the largest left child of the node to delete
-            predecessor = self.predecessor(node_to_delete)
-            removed_color = predecessor.color
-
-            # Transplant predecessor with its left child
-            if predecessor.parent != node_to_delete:
-                self.transplant(predecessor, predecessor.left)
-                predecessor.left = node_to_delete.left
-                predecessor.left.parent = predecessor
-
-            # Transplant node_to_delete with predecessor
-            self.transplant(node_to_delete, predecessor)
-            predecessor.right = node_to_delete.right
-            predecessor.right.parent = predecessor
-
-            # Copy predecessor's key and value to node_to_delete
-            node_to_delete.key = predecessor.key
-            node_to_delete.value = predecessor.value
-
-            # fix the color
-            predecessor.color = Color.BLACK
-
-        if removed_color == Color.BLACK:
-            print("Gotta fix the tree!")
-
-        return child
 
     @override
     def remove(self, key: T) -> Optional[Node[T]]:
@@ -207,66 +137,114 @@ class RBTree[T](RBTreeInterface):
         """
 
         node_to_delete = self.find_by_key(key)
-
         if node_to_delete is None:
             return None
 
-        removed_color = node_to_delete.color
+        removed_node = node_to_delete
+        removed_color = removed_node.color
         child = None
+        # if self.is_leaf(node_to_delete):
+        #     parent = node_to_delete.parent
 
-        if self.is_leaf(node_to_delete):
-            parent = node_to_delete.parent
-            if node_to_delete == node_to_delete.parent.left:
-                parent.left = NIL()
-            elif node_to_delete == node_to_delete.parent.right:
-                parent.right = NIL()
-            node_to_delete.parent = None
-        elif isinstance(node_to_delete.left, NIL) or isinstance(node_to_delete.right, NIL):
+        #     print(f"IF BEFORE NIL: {child}")
+        #     # NEW LINES:
+        #     nil_child = NIL()
+        #     nil_child.parent = parent
+        #     if parent is not None:
+        #         if node_to_delete == parent.left:
+        #             parent.left = nil_child
+        #         elif node_to_delete == parent.right:
+        #             parent.right = nil_child
+
+        #     child = nil_child
+        #     node_to_delete.parent = None
+        #     print(f"IF AFTER NIL: {child}")
+
+
+            # if node_to_delete == node_to_delete.parent.left:
+            #     parent.left = NIL()
+            # elif node_to_delete == node_to_delete.parent.right:
+            #     parent.right = NIL()
+            # node_to_delete.parent = None
+        if isinstance(node_to_delete.left, NIL) or isinstance(node_to_delete.right, NIL):
             # node to removed has exactly one child
             child = node_to_delete.left if self.node_exists(node_to_delete.left) else node_to_delete.right
+            
+            # NEW:
+            # if child is None:
+            #     child = NIL()
+
+            print(f"ELIF BEFORE TRANSPLANT: {child}")
             self.transplant(node_to_delete, child)
+            print(f"ELIF AFTER TRANSPLANT: {child}")
         else:
-            # has both children
-            # find the largest left child of the node to delete
+            # NEW: Trying fix 
+            # Transplant
             predecessor = self.predecessor(node_to_delete)
             node_to_delete.key = predecessor.key
             node_to_delete.value = predecessor.value
             removed_color = predecessor.color
 
-            child = self.get_node_or_mock(predecessor)
-            self.transplant(predecessor, child)
+            child = predecessor.left
+            if predecessor.parent == node_to_delete:
+                child.parent = predecessor
+            else:
+                self.transplant(predecessor, child)
+                predecessor.left = node_to_delete.left
+                predecessor.left.parent = predecessor
 
+            # may also consider change the order of variables
+            self.transplant(node_to_delete, predecessor)
+            predecessor.right = node_to_delete.right 
+            predecessor.right.parent = predecessor
+            predecessor.color = node_to_delete.color
+
+
+
+            # child = predecessor.left if self.node_exists(predecessor.left) else NIL()
+
+            # Ensure child knows its new parent BEFORE transplanting
+            # child.parent = predecessor.parent
+
+            # Splice out the predecessor
+            # if predecessor == predecessor.parent.left:
+            #     predecessor.parent.left = child
+            # else:
+            #     predecessor.parent.right = child
+
+            # predecessor.parent = None
+
+
+            # has both children
+            # find the largest left child of the node to delete
+            # predecessor = self.predecessor(node_to_delete)
+            # node_to_delete.key = predecessor.key
+            # node_to_delete.value = predecessor.value
+            # removed_color = predecessor.color
+
+
+            # # child = self.get_node_or_mock(predecessor)
+            # child = predecessor.left
+            # if child is None:
+            #     child = NIL()
+
+            # print(f"This: {child}")
+            # self.transplant(predecessor, child) 
+    
         if removed_color == Color.BLACK:
             print("Gotta fix the tree!")
+            print(f"Or this: {child}")
+            self._fix_remove(child) # Trying to delete
 
-        return child
 
-    def remove_node_alek_os(self, key: T) -> Optional[Node[T]]:
-        node_to_delete = self.find_by_key(key)
+        self.size = max(0, self.size - 1)
+        if isinstance(self._root, NIL) and self._root is not self.NIL_LEAF:
+            self._root = self.NIL_LEAF
 
-        if node_to_delete is None:
-            return None
-
-        removed_color = node_to_delete.color
-        child = None
-        if self.count_children(node_to_delete) < 2:
-            child = self.get_node_or_mock(node_to_delete)
-            self.transplant(node_to_delete, child)
-        else:
-            min_node = self._min(node_to_delete.right)
-            node_to_delete.key = min_node.key
-            node_to_delete.value = min_node.value
-            removed_color = min_node.color
-            child = self.get_node_or_mock(min_node)
-            self.transplant(min_node, child)
-
-        if removed_color == Color.BLACK:
-            print("Gotta fix the rules, bro!")
-
-        return child
+        return removed_node
 
     def _fix_insert(self, node: Node[T]) -> None:
-        while node != self._root and node.parent.color == Color.RED:
+        while node.parent is not None and node.parent.color == Color.RED:
             uncle = self.find_uncle(node)
             match uncle.color:
                 case Color.RED:
@@ -306,9 +284,82 @@ class RBTree[T](RBTreeInterface):
                     break
 
         self._root.color = Color.BLACK
+        
+    # def remove(self, key: T) -> Optional[Node[T]]:
+    #     node_to_delete = self.find_by_key(key)
+    #     if node_to_delete is None:
+    #         return None
+
+    #     removed_node = node_to_delete
+    #     removed_color = removed_node.color
+    #     if isinstance(node_to_delete.left, NIL):
+    #         replacement = node_to_delete.right
+    #         self.transplant(node_to_delete, node_to_delete.right)
+    #     elif isinstance(node_to_delete.right, NIL):
+    #         replacement = node_to_delete.left
+    #         self.transplant(node_to_delete, node_to_delete.left)
+    #     else:
+    #         successor = self._min(node_to_delete.right)
+    #         removed_color = successor.color
+    #         replacement = successor.right
+    #         if successor.parent == node_to_delete:
+    #             replacement.parent = successor
+    #         else:
+    #             self.transplant(successor, successor.right)
+    #             successor.right = node_to_delete.right
+    #             successor.right.parent = successor
+
+    #         self.transplant(node_to_delete, successor)
+    #         successor.left = node_to_delete.left
+    #         successor.left.parent = successor
+    #         successor.color = node_to_delete.color
+
+    #     if removed_color == Color.BLACK:
+    #         self._fix_remove(replacement)
+
+    #     self.size = max(0, self.size - 1)
+    #     if isinstance(self._root, NIL) and self._root is not self.NIL_LEAF:
+    #         self._root = self.NIL_LEAF
+    #     return removed_node
+
+    # def _fix_insert(self, node: Node[T]) -> None:
+    #     while node.parent is not None and node.parent.color == Color.RED:
+    #         if node.parent == node.parent.parent.left:
+    #             uncle = node.parent.parent.right
+    #             if uncle.color == Color.RED:
+    #                 node.parent.color = Color.BLACK
+    #                 uncle.color = Color.BLACK
+    #                 node.parent.parent.color = Color.RED
+    #                 node = node.parent.parent
+    #             else:
+    #                 if node == node.parent.right:
+    #                     node = node.parent
+    #                     self._left_rotate(node)
+    #                 node.parent.color = Color.BLACK
+    #                 node.parent.parent.color = Color.RED
+    #                 self._right_rotate(node.parent.parent)
+    #         else:
+    #             uncle = node.parent.parent.left
+    #             if uncle.color == Color.RED:
+    #                 node.parent.color = Color.BLACK
+    #                 uncle.color = Color.BLACK
+    #                 node.parent.parent.color = Color.RED
+    #                 node = node.parent.parent
+    #             else:
+    #                 if node == node.parent.left:
+    #                     node = node.parent
+    #                     self._right_rotate(node)
+    #                 node.parent.color = Color.BLACK
+    #                 node.parent.parent.color = Color.RED
+    #                 self._left_rotate(node.parent.parent)
+
+    #     self._root.color = Color.BLACK
 
     def _fix_remove(self, node: Node[T]) -> None:
         while node != self._root and node.color == Color.BLACK:
+            if node.parent is None:
+                break
+
             if node == node.parent.left:
                 sibling = node.parent.right
 
@@ -343,7 +394,7 @@ class RBTree[T](RBTreeInterface):
                     sibling.right.color = Color.BLACK
                     self._left_rotate(node.parent)
 
-                    node = self.root
+                    node = self._root
             else:
                 sibling = node.parent.left
 
@@ -375,13 +426,66 @@ class RBTree[T](RBTreeInterface):
                     self._right_rotate(node.parent)
                     node = self.root
 
+        node.color = Color.BLACK
         self._root.color = Color.BLACK
+        
+    # def _fix_remove(self, node: Node[T]) -> None:
+    #     while node != self._root and node.color == Color.BLACK:
+    #         if node == node.parent.left:
+    #             sibling = node.parent.right
+    #             if sibling.color == Color.RED:
+    #                 sibling.color = Color.BLACK
+    #                 node.parent.color = Color.RED
+    #                 self._left_rotate(node.parent)
+    #                 sibling = node.parent.right
+
+    #             if sibling.left.color == Color.BLACK and sibling.right.color == Color.BLACK:
+    #                 sibling.color = Color.RED
+    #                 node = node.parent
+    #             else:
+    #                 if sibling.right.color == Color.BLACK:
+    #                     sibling.left.color = Color.BLACK
+    #                     sibling.color = Color.RED
+    #                     self._right_rotate(sibling)
+    #                     sibling = node.parent.right
+
+    #                 sibling.color = node.parent.color
+    #                 node.parent.color = Color.BLACK
+    #                 sibling.right.color = Color.BLACK
+    #                 self._left_rotate(node.parent)
+    #                 node = self._root
+    #         else:
+    #             sibling = node.parent.left
+    #             if sibling.color == Color.RED:
+    #                 sibling.color = Color.BLACK
+    #                 node.parent.color = Color.RED
+    #                 self._right_rotate(node.parent)
+    #                 sibling = node.parent.left
+
+    #             if sibling.left.color == Color.BLACK and sibling.right.color == Color.BLACK:
+    #                 sibling.color = Color.RED
+    #                 node = node.parent
+    #             else:
+    #                 if sibling.left.color == Color.BLACK:
+    #                     sibling.right.color = Color.BLACK
+    #                     sibling.color = Color.RED
+    #                     self._left_rotate(sibling)
+    #                     sibling = node.parent.left
+
+    #                 sibling.color = node.parent.color
+    #                 node.parent.color = Color.BLACK
+    #                 sibling.left.color = Color.BLACK
+    #                 self._right_rotate(node.parent)
+    #                 node = self._root
+
+    #     node.color = Color.BLACK
+
 
     def _left_rotate(self, node: Node[T]) -> None:
         right_child = node.right
         node.right = right_child.left
-        if right_child.left is not NIL:
-            right_child.left.parent = node
+        # if right_child.left is not NIL:
+        right_child.left.parent = node
 
         right_child.parent = node.parent
         if node.parent is None:
@@ -397,8 +501,8 @@ class RBTree[T](RBTreeInterface):
     def _right_rotate(self, node: Node[T]) -> None:
         left_child = node.left
         node.left = left_child.right
-        if left_child.right is not None:
-            left_child.right.parent = node
+        # if left_child.right is not None:
+        left_child.right.parent = node
 
         left_child.parent = node.parent
         if node.parent is None:
@@ -412,14 +516,16 @@ class RBTree[T](RBTreeInterface):
         node.parent = left_child
 
     def transplant(self, u: Node[T], v: Union[NIL, Node[T]]) -> None:
-        if u.parent is None:
+        # NEW: added or ...
+        if u.parent is None:  # or isinstance(u.parent, NIL) or u == self._root:
             self._root = v
         elif u == u.parent.left:
             u.parent.left = v
         else:
             u.parent.right = v
 
-        u.parent = v.parent
+        # if v is not None and not isinstance(v, NIL):
+        v.parent = u.parent
 
     @staticmethod
     @override
@@ -437,53 +543,92 @@ class RBTree[T](RBTreeInterface):
 
     @staticmethod
     def _min(node: Union[NIL, Node[T]]) -> Node[T]:
-        parent = None
+        # parent = None
+        # while not isinstance(node, NIL):
+        #     parent = node.parent
+        #     node = node.left
+
+        # return parent.right
+        minimum = node
         while not isinstance(node, NIL):
-            parent = node.parent
+            minimum = node
             node = node.left
 
-        return parent.right
+        return minimum
 
     @staticmethod
     def _max(node: Union[NIL, Node[T]]) -> Node[T]:
-        parent = None
-        while not isinstance(node, NIL):
-            parent = node.parent
-            node = node.right
+        # if node is None or isinstance(node, NIL):
+        #     return None
+        
+        # parent = None
+        # while not isinstance(node, NIL):
+        #     parent = node.parent
+        #     node = node.right
 
-        return parent.left
+        # return parent.left
+        maximum = node
+        while not isinstance(node, NIL):
+            maximum = node
+            node = node.right
+        
+        return maximum
 
     @override
     def predecessor(self, node: Union[NIL, Node[T]]) -> Node[T]:
-        match node.left:
-            case _ if isinstance(node, NIL):
-                parent = node.parent
-                while parent is not None and node == node.parent.left:
-                    node = parent
-                    parent = parent.parent
+        # match node.left:
+        #     case _ if isinstance(node, NIL):
+        #         parent = node.parent
+        #         while parent is not None and node == node.parent.left:
+        #             node = parent
+        #             parent = parent.parent
 
-                return parent
-            case _ if not isinstance(node, NIL):
-                return self._max(node.left)
+        #         return parent
+        #     case _ if not isinstance(node, NIL):
+        #         return self._max(node.left)
+        if isinstance(node, NIL):
+            return None
+        if not isinstance(node.left, NIL):
+            return self._max(node.left)
+        
+        parent = node.parent
+        while parent is not None and node == parent.left:
+            node = parent
+            parent = parent.parent
+
+        return parent
 
     @override
     def successor(self, node: Union[NIL, Node[T]]) -> Node[T]:
-        match node.right:
-            case _ if isinstance(node, NIL):
-                parent = node.parent
-                while parent is not None and node == node.parent.right:
-                    node = parent
-                    parent = parent.parent
+        # match node.right:
+        #     case _ if isinstance(node, NIL):
+        #         parent = node.parent
+        #         while parent is not None and node == node.parent.right:
+        #             node = parent
+        #             parent = parent.parent
 
-                return parent
-            case _ if not isinstance(node, NIL):
-                return self._min(node.right)
+        #         return parent
+        #     case _ if not isinstance(node, NIL):
+        #         return self._min(node.right)
+        if isinstance(node, NIL):
+            return None
+        if not isinstance(node.right, NIL):
+            return self._min(node.right)
+        
+        parent = node.parent
+        while parent is not None and node == parent.right:
+            node = parent
+            parent = parent.parent
+        
+        return parent
 
     @override
     def in_order_traverse(self, node: Union[NIL, Node[T]]) -> None:
         if not isinstance(node, NIL):
             self.in_order_traverse(node.left)
-            print(f"Node (key - value - color): {node.key} - {node.value} - {node.color}")
+            # print(f"Node (key - value - color): {node.key} - {node.value} - {node.color}")
+            parent_key = node.parent.key if node.parent and not isinstance(node.parent, NIL) else "ROOT/NIL"
+            print(f"Node (key - value - color - parent): {node.key} - {node.value} - {node.color} - parent: {parent_key}")
             self.in_order_traverse(node.right)
 
     @override
@@ -506,32 +651,41 @@ class RBTree[T](RBTreeInterface):
 
     @override
     def find_by_key(self, key: T) -> Optional[Node[T]]:
-        try:
-            current = self.root
+        # try:
+        #     current = self.root
 
+        #     if key == current.key:
+        #         return current
+
+        #     parent = None
+        #     while not isinstance(current, NIL):
+        #         parent = current.parent
+
+        #         if key < current.key:
+        #             current = current.left
+        #         else:
+        #             current = current.right
+
+        #     if parent is None:
+        #         return None
+
+        #     if key < parent.key:
+        #         return parent.left
+        #     elif key > parent.key:
+        #         return parent.right
+        #     else:
+        #         return parent
+        # except ValueError as e:
+        #     print(f"Error occurred: {e!s}")
+        current = self._root
+        while not isinstance(current, NIL):
             if key == current.key:
                 return current
-
-            parent = None
-            while not isinstance(current, NIL):
-                parent = current.parent
-
-                if key < current.key:
-                    current = current.left
-                else:
-                    current = current.right
-
-            if parent is None:
-                return None
-
-            if key < parent.key:
-                return parent.left
-            elif key > parent.key:
-                return parent.right
+            if key < current.key:
+                current = current.left
             else:
-                return parent
-        except ValueError as e:
-            print(f"Error occurred: {e!s}")
+                current = current.right
+        return None
 
     @staticmethod
     def find_uncle(node: Node[T]) -> Union[NIL, Node[T]]:
@@ -544,59 +698,159 @@ class RBTree[T](RBTreeInterface):
         return node.parent.parent.left
 
     def find_sibling(self, node: Node[T]) -> Union[NIL, Node[T]]:
-        ...
+        if node.parent is None:
+            return NIL()
+        if node == node.parent.left:
+            return node.parent.right
+        return node.parent.left
 
     @property
     def root(self) -> Node[T]:
+        # Ignored - I see: so we just use
+        # _root because easier to debug when abstractions omitted
+
         match self.get_root():
             case result if result.is_ok():
                 return result.unwrap()
-            case error if result.is_error():
+            case error if result.is_err():
                 raise Exception(error.unwrap_err())
             case _:
                 raise Exception("Other error")
 
     def get_root(self) -> ResultType[Node[T], str]:
         """Retrieves the root"""
-        match self._root:
-            case root if not isinstance(root, NIL):
-                return ResultType(value=root)
-            case nil if isinstance(nil, NIL):
-                return ResultType(error=f"The root doesn't exist")
+        # match self._root:
+        #     case root if not isinstance(root, NIL):
+        #         return ResultType(value=root)
+        #     case nil if isinstance(nil, NIL):
+        #         return ResultType(error=f"The root doesn't exist")
+        if self._root is None:
+            return ResultType(error="The root doesn't exist")
+        return ResultType(value=self._root)
 
     @override
     def is_empty(self) -> bool:
-        return self.root is NIL
+        # CHANGED: we check the NIL too and 
+        # instead of "self.root" I was using "_root"
+        return self._root is None or isinstance(self._root, NIL)
 
     @staticmethod
     @override
     def is_leaf(node: Union[Node[T], NIL]) -> bool:
         # has no children
         return isinstance(node.left, NIL) and isinstance(node.right, NIL)
+    
+
+    def verify_properties(self) -> bool:
+        """Verifies Red-Black Tree invariants: Root color, Red-Red checks, and Black Height parity."""
+        if isinstance(self._root, NIL):
+            return True
+
+        # Property 2: Root must be BLACK
+        if self._root.color != Color.BLACK:
+            print("Violation: Root is not BLACK")
+            return False
+
+        def _check_node(node: Node[T]) -> tuple[bool, int]:
+            if isinstance(node, NIL):
+                return True, 1  # NIL leaves count as 1 black node
+
+            # Property 4: No RED node has a RED child
+            if node.color == Color.RED:
+                if node.left.color == Color.RED or node.right.color == Color.RED:
+                    print(f"Violation: Red-Red hazard at key {node.key}")
+                    return False, 0
+
+            left_ok, left_black_height = _check_node(node.left)
+            right_ok, right_black_height = _check_node(node.right)
+
+            if not left_ok or not right_ok:
+                return False, 0
+
+            # Property 5: Equal black height across all paths
+            if left_black_height != right_black_height:
+                print(f"Violation: Black height mismatch at key {node.key} (left={left_black_height}, right={right_black_height})")
+                return False, 0
+
+            current_black = 1 if node.color == Color.BLACK else 0
+            return True, left_black_height + current_black
+
+        ok, _ = _check_node(self._root)
+        return ok
 
 
-def main():
+# def main():
+#     rb = RBTree[int]()
+#     rb.add(key=1, value=15)
+#     rb.add(key=2, value=13)
+#     rb.add(key=3, value=16)
+#     rb.add(key=4, value=19)
+#     rb.add(key=5, value=20)
+#     rb.add(key=6, value=23)
+#     rb.add(key=7, value=29)
+#     rb.add(key=8, value=31)
+#     rb.add(key=9, value=32)
+#     rb.add(key=10, value=33)
+#     rb.add(key=11, value=51)
+#     rb.add(key=12, value=39)
+#     print("BEFORE REMOVAL")
+#     rb.in_order_traverse(rb.root)
+
+#     print()
+#     print("AFTER REMOVAL")
+#     rb.remove(8)
+#     rb.in_order_traverse(rb.root)
+
+
+# if __name__ == "__main__":
+#     main()
+    
+
+import random
+
+def run_rb_tree_stress_test():
     rb = RBTree[int]()
-    rb.add(key=1, value=15)
-    rb.add(key=2, value=13)
-    rb.add(key=3, value=16)
-    rb.add(key=4, value=19)
-    rb.add(key=5, value=20)
-    rb.add(key=6, value=23)
-    rb.add(key=7, value=29)
-    rb.add(key=8, value=31)
-    rb.add(key=9, value=32)
-    rb.add(key=10, value=33)
-    rb.add(key=11, value=51)
-    rb.add(key=12, value=39)
-    print("BEFORE REMOVAL")
+    
+    # Standard 1-12 dataset
+    initial_keys = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+    for k in initial_keys:
+        rb.add(key=k, value=k * 10)
+
+    print("=== INITIAL TREE (IN-ORDER WITH PARENTS) ===")
+    rb.in_order_traverse(rb.root)
+    print("\nRoot key:", rb.root.key if rb.root else "NONE")
+
+    # TEST 0: Verify Tree
+    print("=== VERIFY TREE ===")
+    print(rb.verify_properties())
+
+    # TEST 1: Delete a key (Leaf / Black Node Deletion)
+    print("\n--- TEST 1: Deleting Key 8 ---")
+    rb.remove(8)
     rb.in_order_traverse(rb.root)
 
-    print()
-    print("AFTER REMOVAL")
-    rb.remove_copilot(8)
+    # TEST 2: Delete Root Node
+    current_root_key = rb.root.key
+    print(f"\n--- TEST 2: Deleting Current Root (Key {current_root_key}) ---")
+    rb.remove(current_root_key)
     rb.in_order_traverse(rb.root)
+    print("New Root key:", rb.root.key if rb.root else "NONE")
 
+    # TEST 3: Drain Test (Delete remaining nodes one by one)
+    print("\n--- TEST 3: Sequential Drain Test ---")
+    remaining_keys = [k for k in initial_keys if k != 8 and k != current_root_key]
+    random.shuffle(remaining_keys)
+    
+    for key in remaining_keys:
+        print(f"Removing key {key}...")
+        rb.remove(key)
+        
+    print("\n=== FINAL TREE (SHOULD BE EMPTY OR ONLY NIL) ===")
+    if rb.root is None or isinstance(rb.root, NIL):
+        print("Success! Tree successfully drained to empty NIL root.")
+    else:
+        rb.in_order_traverse(rb.root)
 
 if __name__ == "__main__":
-    main()
+    run_rb_tree_stress_test()
+
